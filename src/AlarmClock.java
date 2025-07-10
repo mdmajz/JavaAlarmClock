@@ -1,6 +1,7 @@
 import javax.sound.sampled.*;
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Scanner;
 
@@ -18,13 +19,20 @@ public class AlarmClock implements Runnable {
 
     @Override
     public void run() {
-        while (LocalTime.now().isBefore(alarmTime)) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime alarmDateTime = now.with(alarmTime);
+
+
+        if (alarmDateTime.isBefore(now)) {
+            alarmDateTime = alarmDateTime.plusDays(1);
+        }
+
+        while (LocalDateTime.now().isBefore(alarmDateTime)) {
             try {
                 Thread.sleep(1000);
-
-                LocalTime now = LocalTime.now();
-
-                System.out.printf("\r%02d:%02d:%02d", now.getHour(), now.getMinute(), now.getSecond());
+                LocalTime current = LocalTime.now();
+                System.out.printf("\r%02d:%02d:%02d", current.getHour(), current.getMinute(), current.getSecond());
+                System.out.flush();
 
             } catch (InterruptedException e) {
                 System.out.println("Thread was interrupted");
@@ -45,7 +53,6 @@ public class AlarmClock implements Runnable {
             scanner.nextLine();
             clip.stop();
 
-            scanner.close();
         } catch (UnsupportedAudioFileException e) {
             System.out.println("Audio file not supported");
         } catch (LineUnavailableException e) {
